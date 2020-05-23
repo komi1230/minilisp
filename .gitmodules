@@ -1,0 +1,6 @@
+[submodule "rust"]
+	path = rust
+	url = https://github.com/komi1230/lisp-in-rust
+[submodule "python"]
+	path = python
+	url = https://github.com/komi1230/mini_lisp
