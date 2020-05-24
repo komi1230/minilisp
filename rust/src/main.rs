@@ -1,11 +1,58 @@
 extern crate minilisp;
 
+use std::io;
+use std::io::prelude::*;
+use std::collections::VecDeque;
+
+use minilisp::environment::EnvRef;
+use minilisp::parser::Val;
+
+
 fn main() {
-    println!("Hello, world!");
+    run();
+}
 
-    let s = "   (+ 1 (- \"2.2\" 3))";
-    println!("Before : {}", s);
+fn run() {
+    let global_env = minilisp::environment::standard_env();
+    read_eval_print_loop(global_env);
+}
 
-    let mut ss = minilisp::parser::parse(s);
-    println!("Tokens: {:?}", ss);
+
+fn read_eval_print_loop(env: EnvRef) -> ! {
+    loop {
+        print!("lisp.rs> ");
+        io::stdout().flush().unwrap();
+
+        let mut input = String::new();
+
+        io::stdin().read_line(&mut input)
+            .ok()
+            .expect("Failed to read line");
+
+        read_eval_print(input.trim(), env.clone());
+    }
+}
+
+fn read_eval_print(program: &str, env: EnvRef) {
+    let program_result = minilisp::evaluator::eval(minilisp::parser::parse(program), env.clone());
+    print!("=> ");
+    print_val(&program_result);
+}
+
+fn format_list(list: &VecDeque<Val>) -> String {
+    let formatted_items: Vec<String> = list.iter().map(|item| format_val(&item)).collect();
+
+    format!("({})", formatted_items.join(" "))
+}
+
+fn format_val(val: &Val) -> String {
+    match *val {
+        Val::List(ref x) => format_list(&x),
+        Val::Number(ref x) => format!("{}", x),
+        Val::Symbol(ref x) => format!("{}", x),
+    }
+}
+
+fn print_val(val: &Val) {
+    println!("{}", format_val(&val));
 }

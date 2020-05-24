@@ -1,12 +1,15 @@
 use std::collections::VecDeque;
 
+use crate::evaluator::Proc;
+
+
 #[derive(Debug,Clone)]
 pub enum Val {
     List(VecDeque<Val>),
     Number(f64),
     Symbol(String),
+    Callable(Proc),
 }
-
 
 
 fn tokenize(s: &str) -> VecDeque<String> {
@@ -53,13 +56,3 @@ fn atom(token: String) -> Val {
         Err(_) => Val::Symbol(token),
     }
 }
-
-fn symbol_true() -> Val {
-    Val::Symbol("#t".to_string())
-}
-
-
-fn symbol_false() -> Val {
-    Val::Symbol("#f".to_string())
-}
-
