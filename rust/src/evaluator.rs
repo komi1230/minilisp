@@ -43,7 +43,10 @@ impl Proc {
 pub fn eval(val: Val, env: EnvRef) -> Val {
     // println!("eval {:?}", &val);
     let result = match val {
-        Val::Symbol(x) => Rc::try_unwrap(env).unwrap().unwrap().access(&x),
+        Val::Symbol(x) => match Rc::try_unwrap(env) {
+            Ok(v) => v.unwrap().access(&x),
+            Err(_v) => Val::Symbol("Invalid input".to_string())
+        },
         Val::Number(_) => val,
         Val::List(list) => {
             let mut args = list;
@@ -61,14 +64,14 @@ pub fn eval(val: Val, env: EnvRef) -> Val {
                             let exp = if !environment::is_false(test_result) { conseq } else { alt };
                             eval(exp, env.clone())
                         },
-                        "lambda" => {
-                            let params = match args.pop_front().unwrap() {
-                                Val::List(x) => x,
-                                _ => panic!("expected params to be a list"),
-                            };
-                            let body = args.pop_front().unwrap();
-                            Val::Callable(Proc::new(params, body, env.clone()))
-                        },
+                        // "lambda" => {
+                        //     let params = match args.pop_front().unwrap() {
+                        //         Val::List(x) => x,
+                        //         _ => panic!("expected params to be a list"),
+                        //     };
+                        //     let body = args.pop_front().unwrap();
+                        //     Val::Callable(Proc::new(params, body, env.clone()))
+                        // },
                         "define" => {
                             let var = args.pop_front().unwrap();
                             let exp = args.pop_front().unwrap();
@@ -116,7 +119,7 @@ pub fn call_proc(proc_name: &String, mut args: VecDeque<Val>) -> Val {
                 None => environment::symbol_false(),
             }
         },
-        _ => panic!("unknown proc"),
+        _ => Val::Symbol("Invalid input".to_string()),
     }
 }
 

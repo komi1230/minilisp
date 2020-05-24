@@ -1,14 +1,11 @@
 use std::collections::VecDeque;
 
-use crate::evaluator::Proc;
-
-
 #[derive(Debug,Clone)]
 pub enum Val {
     List(VecDeque<Val>),
     Number(f64),
     Symbol(String),
-    Callable(Proc),
+    // Callable(Proc),
 }
 
 

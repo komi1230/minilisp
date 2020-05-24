@@ -20,7 +20,7 @@ fn run() {
 
 fn read_eval_print_loop(env: EnvRef) -> ! {
     loop {
-        print!("lisp.rs> ");
+        print!(">>> ");
         io::stdout().flush().unwrap();
 
         let mut input = String::new();
@@ -39,10 +39,8 @@ fn read_eval_print(program: &str, env: EnvRef) {
     print_val(&program_result);
 }
 
-fn format_list(list: &VecDeque<Val>) -> String {
-    let formatted_items: Vec<String> = list.iter().map(|item| format_val(&item)).collect();
-
-    format!("({})", formatted_items.join(" "))
+fn print_val(val: &Val) {
+    println!("{}", format_val(&val));
 }
 
 fn format_val(val: &Val) -> String {
@@ -53,6 +51,8 @@ fn format_val(val: &Val) -> String {
     }
 }
 
-fn print_val(val: &Val) {
-    println!("{}", format_val(&val));
+fn format_list(list: &VecDeque<Val>) -> String {
+    let formatted_items: Vec<String> = list.iter().map(|item| format_val(&item)).collect();
+
+    format!("({})", formatted_items.join(" "))
 }
