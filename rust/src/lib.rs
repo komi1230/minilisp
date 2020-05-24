@@ -1,3 +1,3 @@
-pub mod environment;
+//pub mod environment;
 //pub mod evaluator;
 pub mod parser;

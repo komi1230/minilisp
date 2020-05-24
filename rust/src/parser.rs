@@ -9,13 +9,13 @@ pub enum Val {
 
 
 
-pub fn tokenize(s: &str) -> VecDeque<String> {
+fn tokenize(s: &str) -> VecDeque<String> {
     // Spread each tokens
     s.replace("(", " ( ")
         .replace(")", " ) ")
         .split_whitespace()
         .map(|item| item.to_string())
-        .collect();
+        .collect()
 }
 
 
@@ -25,18 +25,17 @@ pub fn parse(program: &str) -> Val {
 }
 
 
-fn read_from_tokens(tokens: &mut Vec<String>) -> Val {
+fn read_from_tokens(tokens: &mut VecDeque<String>) -> Val {
     if tokens.len() == 0 {
         panic!("unexpected EOF while reading");
     }
-    let token = tokens.remove(0);
+    let token = tokens.pop_front().unwrap();
     // println!("reading token: '{}'", token);
     if "(".to_string() == token {
-        let mut list: Vec<Val> = Vec::new();
+        let mut list: VecDeque<Val> = VecDeque::new();
         while tokens[0] != ")".to_string() {
-            list.push(read_from_tokens(tokens));
+            list.push_back(read_from_tokens(tokens));
         }
-        tokens.remove(0); // pop off ")"
         Val::List(list)
     } else if ")".to_string() == token {
         panic!("unexpected ')' while reading");
@@ -54,7 +53,6 @@ fn atom(token: String) -> Val {
         Err(_) => Val::Symbol(token),
     }
 }
-
 
 fn symbol_true() -> Val {
     Val::Symbol("#t".to_string())

@@ -6,11 +6,6 @@ fn main() {
     let s = "   (+ 1 (- \"2.2\" 3))";
     println!("Before : {}", s);
 
-    let mut ss = minilisp::parser::tokenize(s);
+    let mut ss = minilisp::parser::parse(s);
     println!("Tokens: {:?}", ss);
-
-    let mut hoge = minilisp::environment::cdr(&mut ss);
-    println!("{:?}", hoge);
-
-    println!("{}", minilisp::parser::print(hoge));
 }

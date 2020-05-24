@@ -1,35 +1,35 @@
-fn is_lisp_string(token: String) -> bool {
-    let length = token.len();
-    let cs = token.chars();
-    if cs.nth(0).unwrap() == "\"" && cs.nth(length-1).unwrap() == "\"" {
-        for i in 1..(length-1) {
-            if cs.nth(i).unwrap() == "\"" {
-                return false
+use std::collections::VecDeque;
+
+#[derive(Debug,Clone)]
+struct Proc {
+    params: VecDeque<minilisp::parser::Val>,
+    body: minilisp::parser::Val,
+    env: EnvRef,
+}
+
+impl Proc {
+    fn new(params: Vec<Val>, body: Val, env: EnvRef) -> Proc {
+        Proc {
+            params: params,
+            body: body,
+            env: env,
+        }
+    }
+
+    fn call(&self, args: Vec<Val>) -> Val {
+        if args.len() != self.params.len() {
+            panic!("incorrect number of args for func, expected {}, got {}", self.params.len(), args.len());
+        } else {
+            let mut local_env = Env::new(self.env.clone());
+            for i in 0..self.params.len() {
+                let param_name = match self.params[i] {
+                    Val::Symbol(ref x) => x.clone(),
+                    _ => panic!("param names must be symbols"),
+                };
+                local_env.define(&param_name, args[0].clone()); // TODO: optimise
             }
+            let local_env_ref: EnvRef = Rc::new(Some(local_env));
+            eval(self.body.clone(), local_env_ref)
         }
     }
-    true
 }
-
-
-pub fn eval(tokens: &mut VecDeque<String>) -> String {
-
-    // Get head token
-    let token = tokens.pop_front().unwrap();
-
-    // Include list
-    if token == "(" {
-        let mut list = VecDeque::new();
-        while tokens.len() > 0 && tokens[0] != ")" {
-            list.push_back(tokens.pop_front());
-        }
-        return eval(list);
-    }
-
-    // String
-    if is_lisp_string(token) {
-        return token;
-    }
-    
-}
-
