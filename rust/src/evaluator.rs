@@ -80,7 +80,10 @@ pub fn eval(val: Val, env: EnvRef) -> Val {
                                 _ => panic!("first arg to define must be a symbol"),
                             };
                             let exp_result = eval(exp, env.clone());
-                            Rc::try_unwrap(env).unwrap().unwrap().define(&var_name, exp_result);
+                            let hoge = Rc::try_unwrap(env);
+                            let hogee = hoge.unwrap();
+                            let mut hogeee = hogee.unwrap();
+                            let hogeeee = hogeee.define(&var_name, exp_result);
                             environment::symbol_false()
                         },
                         // otherwise, call procedure
