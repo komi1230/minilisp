@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-use crate::environment::{self, EnvRef};
+use crate::environment::{self, Env, EnvRef};
 use crate::parser::{self, Val};
 
 
@@ -33,17 +33,17 @@ impl Proc {
                 };
                 local_env.define(&param_name, args[0].clone()); // TODO: optimise
             }
-            let local_env_ref: EnvRef = Rc::new(Some(local_env));
-            eval(self.body.clone(), local_env_ref)
+            let mut local_env_ref: EnvRef = Rc::new(Some(local_env));
+            eval(self.body.clone(), &mut local_env_ref)
         }
     }
 }
 
 
-pub fn eval(val: Val, env: EnvRef) -> Val {
+pub fn eval(val: Val, env: &mut EnvRef) -> Val {
     // println!("eval {:?}", &val);
     let result = match val {
-        Val::Symbol(x) => match Rc::try_unwrap(env) {
+        Val::Symbol(x) => match Rc::try_unwrap(env.clone()) {
             Ok(v) => v.unwrap().access(&x),
             Err(_v) => Val::Symbol("Invalid input".to_string())
         },
@@ -60,9 +60,9 @@ pub fn eval(val: Val, env: EnvRef) -> Val {
                             let test = args.pop_front().unwrap();
                             let conseq = args.pop_front().unwrap();
                             let alt = args.pop_front().unwrap();
-                            let test_result = eval(test, env.clone());
+                            let test_result = eval(test, env);
                             let exp = if !environment::is_false(test_result) { conseq } else { alt };
-                            eval(exp, env.clone())
+                            eval(exp, env)
                         },
                         // "lambda" => {
                         //     let params = match args.pop_front().unwrap() {
@@ -79,17 +79,18 @@ pub fn eval(val: Val, env: EnvRef) -> Val {
                                 Val::Symbol(ref x) => x,
                                 _ => panic!("first arg to define must be a symbol"),
                             };
-                            let exp_result = eval(exp, env.clone());
-                            let hoge = Rc::try_unwrap(env);
-                            let hogee = hoge.unwrap();
-                            let mut hogeee = hogee.unwrap();
-                            let hogeeee = hogeee.define(&var_name, exp_result);
-                            environment::symbol_false()
+                            let exp_result = eval(exp, env);
+                            match Rc::try_unwrap(env.clone()) {
+                                Ok(v) => v.unwrap().define(&var_name, exp_result),
+                                Err(v) => panic!("You cannot define function")
+                            };
+                            //env.define(&var_name, exp_result);
+                            environment::symbol_true()
                         },
                         // otherwise, call procedure
                         _ => {
                             let evaluated_args: VecDeque<Val> = args.iter()
-                                .map(|arg| eval(arg.clone(), env.clone()))
+                                .map(|arg| eval(arg.clone(), env))
                                 .collect();
                             call_proc(&symbol, evaluated_args)
                         },

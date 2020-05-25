@@ -9,16 +9,16 @@ use minilisp::parser::Val;
 
 
 fn main() {
-    run();
+    repl();
 }
 
-fn run() {
-    let global_env = minilisp::environment::standard_env();
-    read_eval_print_loop(global_env);
+fn repl() {
+    let mut global_env = minilisp::environment::standard_env();
+    read_eval_print_loop(&mut global_env);
 }
 
 
-fn read_eval_print_loop(env: EnvRef) -> ! {
+fn read_eval_print_loop(env: &mut EnvRef) -> ! {
     loop {
         print!(">>> ");
         io::stdout().flush().unwrap();
@@ -29,12 +29,12 @@ fn read_eval_print_loop(env: EnvRef) -> ! {
             .ok()
             .expect("Failed to read line");
 
-        read_eval_print(input.trim(), env.clone());
+        read_eval_print(input.trim(), env);
     }
 }
 
-fn read_eval_print(program: &str, env: EnvRef) {
-    let program_result = minilisp::evaluator::eval(minilisp::parser::parse(program), env.clone());
+fn read_eval_print(program: &str, env: &mut EnvRef) {
+    let program_result = minilisp::evaluator::eval(minilisp::parser::parse(program), env);
     print!("=> ");
     print_val(&program_result);
 }

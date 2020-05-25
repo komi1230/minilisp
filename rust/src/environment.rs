@@ -34,10 +34,7 @@ impl Env {
     }
 
     pub fn define(&mut self, var_name: &String, val: Val) {
-        match self.vars.insert(var_name.to_owned(), val) {
-            Some(_) => panic!("can't define variable '{}', already defined in this scope", var_name),
-            None => (),
-        }
+        self.vars.insert(var_name.to_owned(), val);
     }
 
     pub fn assign(&mut self, var_name: &String, val: Val) {
